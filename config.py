@@ -11,7 +11,7 @@ config = {
         'train_dl_on_all_data' : True, # если нужно получить и сохранить модель, иначе для dl моделей просто проводится поиск или cv
         'save_models' : False,
         'save_logs' : True,
-        'show_logs' : True,
+        'show_logs' : False,
         'boosting_verbose': 0,
         'device' : 'cpu',
         'show_graphs' : False,
@@ -141,7 +141,7 @@ config = {
         'lgbm': True,
         'mlp': True,
         'mlp_emb': True,
-        'averaging': False,
+        'averaging': True,
         'stacking': False,
     },
     'dl_train' : {
