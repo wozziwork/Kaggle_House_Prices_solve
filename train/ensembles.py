@@ -29,7 +29,7 @@ def averaging(oof_res : pd.DataFrame) -> float:
 def stacking_cv(meta_model : Ridge, dataset : Dataset) -> float:
     """
     Оценка стекинга catboost, lgbm.
-    Возвращает полученный на rmse по всем внешним OOF прогнозам.
+    Возвращает RMSE по всем OOF-прогнозам внешней кросс-валидации
     """
     # создаем модели, которые будут обучаться для стекинга
     lgbm = (LGBMRegressor(**OmegaConf.to_container(cfg.models.lgbm, resolve=True))
@@ -54,8 +54,8 @@ def stacking_train(meta_model : Ridge, oof_results : pd.DataFrame) -> Ridge:
 
 def ensemble_experiment(dataset : Dataset, oof_preds : dict) -> dict[str, float]:
     """
-    Эксперимент-оценка ансамблей(stacking с Ridge, averaging) на OOF-прогноах логарифма цены базовых моделей.
-    Оценка стекинга выполняется отдельно через вложенную кросс-валидацию.
+    Эксперимент-оценка ансамблей(stacking с Ridge, averaging) на OOF-прогнозах логарифма цены базовых моделей.
+    Оценка стекинга выполняется отдельно через вложенную кросс-валидацию (при stacking.cv=True).
     Также обучает Ridge (метамодель) на всей OOF-таблице и сохраняет его согласно конфигу.
     OOF-таблица формируется из словаря oof_preds или читается из файла, путь к которому указан в конфиге.
     Выводит и сохраняет результаты оценок согласно настройкам конфига.
