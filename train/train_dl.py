@@ -50,11 +50,11 @@ def train_dl(
         if cfg.to_grid_search.mlp:
             param_grid = OmegaConf.to_container(cfg.param_grids.mlp, resolve=True)
             # params - лучшее сочетание параметров по поиску по сетке
-            best_acc, params, search_results = search_mlp_cv(X_train, y_train, model_name, param_grid, params)
+            best_rmse, params, search_results = search_mlp_cv(X_train, y_train, model_name, param_grid, params)
             experiment_results = pd.DataFrame(search_results).T
             experiment_results.loc['best_params'] = None
             experiment_results.at['best_params', 'params'] = params
-            experiment_results.loc['best_rmse', 'mean_rmse'] = best_acc
+            experiment_results.loc['best_rmse', 'mean_rmse'] = best_rmse
         else:
             cv_results, full_history, mean_rmse, mlp_oof_preds = mlp_cv(
                 X_train,
@@ -95,11 +95,11 @@ def train_dl(
         if cfg.to_grid_search[model_name]:
             param_grid = OmegaConf.to_container(cfg.param_grids[model_name], resolve=True)
             # params - лучшее сочетание параметров по поиску по сетке
-            best_acc, params, search_results = search_mlp_cv(X_train, y_train, model_name, param_grid, params)
+            best_rmse, params, search_results = search_mlp_cv(X_train, y_train, model_name, param_grid, params)
             experiment_results = pd.DataFrame(search_results).T
             experiment_results.loc['best_params'] = None
             experiment_results.at['best_params', 'params'] = params
-            experiment_results.loc['best_rmse', 'mean_rmse'] = best_acc
+            experiment_results.loc['best_rmse', 'mean_rmse'] = best_rmse
         else:
             cv_results, full_history, mean_rmse, mlpemb_oof_preds = mlp_cv(
                 X_train,

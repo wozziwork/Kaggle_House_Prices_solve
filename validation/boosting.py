@@ -220,7 +220,7 @@ def get_boosting_oof(
         build_preprocessor_func : Callable[[], ColumnTransformer | CategoryCaster],
     ) -> np.ndarray:
     """
-    Получение oof проб для настроенных catboost и lgbm моделей.
+    Возвращает OOF-прогнозы логарифма цены для catboost или lgbm в исходном порядке строк.
     """
     oof_preds = np.full(X.shape[0], np.nan)
     cv = build_cv()
