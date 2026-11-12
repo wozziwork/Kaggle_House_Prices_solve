@@ -9,7 +9,7 @@ config = {
         'train' : True,
         'inference' : False, # модели для инференса указываются в разделе inference
         'train_dl_on_all_data' : True, # если нужно получить и сохранить модель, иначе для dl моделей просто проводится поиск или cv
-        'save_models' : True,
+        'save_models' : False,
         'save_logs' : True,
         'show_logs' : True,
         'boosting_verbose': 0,
@@ -128,7 +128,7 @@ config = {
             'alpha' : 1,
             'catboost_iterations' : 600,
             'lgbm_n_estimators' : 1100,
-            'cv' : False # флаг проведения кросс-валидации
+            'cv' : True # флаг проведения кросс-валидации
         }
     },
     'to_train': {
