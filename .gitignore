@@ -1,1 +1,9 @@
-.agents
+/catboost_info
+/.agents
+.venv
+.idea/
+AGENTS.MD
+__pycache__/
+*.py[cod]
+.venv-check/
+.ipynb_checkpoints/

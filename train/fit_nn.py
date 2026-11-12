@@ -1,0 +1,102 @@
+import copy
+from collections import defaultdict
+from sklearn.metrics import root_mean_squared_error
+from torch import Tensor
+from config import config as cfg
+from tqdm.auto import tqdm
+import torch
+
+from dl_models.mlp import MLP
+from dl_models.mlp_emb import MLPEmb
+
+
+def fit_nn(
+        model : MLP | MLPEmb,
+        train_loader : torch.utils.data.DataLoader,
+        optimizer : torch.optim.Optimizer,
+        loss_fn : torch.nn.Module,
+        epochs : int,
+        early_stopping_patience : int,
+        device : str = 'cpu',
+        val_inputs : tuple[Tensor, ...] | None = None,
+        y_val : Tensor | None = None,
+        ) -> tuple[MLP | MLPEmb, dict, int]:
+    """
+    Выполняет обучение переданной нейросети с необязательной валидацией.
+    При наличии валидации и early stopping восстанавливает лучшее сохраненное состояние по validation rmse
+    early_stopping_patience = 0 отключает и early_stopping, и выбор лучшего состояния
+    Args:
+        model : созданная модель с настроенной архитектурой
+        train_loader : загрузчик данных, формат батча (*x_inputs, y)
+        optimizer : оптимизатор, связанный с параметрами переданной модели
+        loss_fn : лосс-функция
+        epochs : максимальное количество эпох обучения
+        early_stopping_patience : число эпох подряд без улучшения validation rmse
+        device : наименование устройства, на котором будет проходить обучение
+        val_inputs : кортеж тензоров с валидационными данными
+        y_val : тензор с правильными ответами для валидационных данных
+    Returns:
+        model : обученная модель
+        history : история train loss, и при наличии валидации, val_loss и rmse
+        best_epoch : индекс выбранной эпохи, начиная с 0; -1 если early_stopping отключен или нет валидации
+    """
+    if val_inputs is not None and y_val is not None:
+        val_inputs = tuple(X.to(device) for X in val_inputs)
+        y_val = y_val.to(device)
+
+    history = defaultdict(list)
+    best_val_rmse = float('inf')
+    best_model_state = None
+    failed_epochs = 0
+    best_epoch = -1
+
+    if isinstance(model, MLP): model_name = 'MLP'
+    else: model_name = 'MLPEmb'
+
+    progress = tqdm(range(epochs), desc=f'Обучение {model_name}', disable=cfg.general.tqdm_disable)
+    for epoch in progress:
+        model.train()
+        train_loss_sum = 0
+        for *inputs, y_batch in train_loader:
+            inputs = [X.to(device) for X in inputs]
+            y_batch = y_batch.to(device)
+            preds = model(*inputs)
+            loss = loss_fn(preds, y_batch)
+            train_loss_sum += loss.item() * y_batch.shape[0]
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+
+        history['train_loss'].append(train_loss_sum / len(train_loader.dataset))
+
+        model.eval()
+        if val_inputs is not None and y_val is not None:
+            with torch.no_grad():
+                val_preds = model(*val_inputs)
+
+                val_loss = loss_fn(val_preds, y_val)
+                rmse = root_mean_squared_error(y_val.cpu().numpy().ravel(), val_preds.cpu().numpy().ravel())
+
+                history['val_loss'].append(val_loss.item())
+                history['val_rmse'].append(rmse)
+
+                progress.set_postfix(
+                    val_loss=val_loss.item(),
+                    val_rmse=rmse,
+                )
+
+                if early_stopping_patience:
+                    if rmse < best_val_rmse:
+                        failed_epochs = 0
+                        best_val_rmse = rmse
+                        best_model_state = copy.deepcopy(model.state_dict())
+                        best_epoch = epoch
+                    else:
+                        failed_epochs += 1
+                        if failed_epochs >= early_stopping_patience:
+                            break
+
+    if best_model_state is not None:
+        model.load_state_dict(best_model_state)
+
+    return model, history, best_epoch
