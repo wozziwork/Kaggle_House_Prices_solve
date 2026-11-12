@@ -6,8 +6,8 @@ config = {
     'general' : {
         'experiment_name' : 'FINAL',
         'seed' : 67,
-        'train' : False,
-        'inference' : True, # модели для инференса указываются в разделе inference
+        'train' : True,
+        'inference' : False, # модели для инференса указываются в разделе inference
         'train_dl_on_all_data' : True, # если нужно получить и сохранить модель, иначе для dl моделей просто проводится поиск или cv
         'save_models' : True,
         'save_logs' : True,
@@ -132,13 +132,13 @@ config = {
         }
     },
     'to_train': {
-        'elastic_net': False,
+        'elastic_net': True,
         'ridge' : False,
         'knn': False,
         'decision_tree': False,
         'random_forest': False,
-        'catboost': False,
-        'lgbm': False,
+        'catboost': True,
+        'lgbm': True,
         'mlp': True,
         'mlp_emb': True,
         'averaging': False,
@@ -261,17 +261,17 @@ config = {
         },
     },
     'to_inference' : {
-        'elastic_net' : True,
-        'ridge' : True,
-        'knn' : True,
-        'decision_tree' : True,
-        'random_forest' : True,
-        'catboost' : True,
-        'lgbm' : True,
-        'mlp' : True,
-        'mlp_emb' : True,
-        'averaging': True,
-        'stacking': True,
+        'elastic_net' : False,
+        'ridge' : False,
+        'knn' : False,
+        'decision_tree' : False,
+        'random_forest' : False,
+        'catboost' : False,
+        'lgbm' : False,
+        'mlp' : False,
+        'mlp_emb' : False,
+        'averaging': False,
+        'stacking': False,
     }
 }
 
